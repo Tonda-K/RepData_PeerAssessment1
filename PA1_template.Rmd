@@ -1,0 +1,209 @@
+This is markdown file for Peer Assessment 1 in Reproducible research course 
+===========================================================================
+
+## Loading and preprocessing the data
+
+Read the activity.csv data into R object. We assume you download and unzip the data already and set working directory as well. 
+
+```{r Read_file, echo=TRUE}
+dataset <- read.csv("activity.csv")
+```
+
+Check the data.
+
+```{r Check_data, echo=TRUE}
+str(dataset)
+sum(is.na(dataset[,1]))
+```
+
+## What is mean and median total number of steps taken per day?
+
+##### Make a histogram of the total number of steps taken each day #####
+
+Calculate total steps per day.
+We use reshape2 and plyr packages for this.
+We store the result into total_steps data frame. 
+
+```{r library, echo=TRUE, results='hide'}
+library(reshape2); library(dplyr)
+```
+
+```{r Steps/day, echo=TRUE}
+total_steps_NA <- aggregate( steps ~ date, data=dataset, FUN=sum)
+```
+
+Create histogram of the total number of steps taken per day
+
+```{r Steps/day hist, echo=TRUE}
+rg_NA <- range(total_steps_NA$steps)
+with(total_steps_NA, hist(steps, main="Histogram of total steps by date",
+                            xlab = "Total steps by day",ylab = "Counts", col = "blue",
+                            breaks=20, axes=FALSE))
+axis(1, at=1000*0:rg_NA[2])
+axis(2, at=2*0:20)
+
+```
+
+Calculate the mean and the median of total number of steps per day
+
+```{r Steps/day mean, echo=TRUE}
+M_steps_na <- aggregate( steps ~ date, data=dataset, FUN=mean)
+Md_steps_na <- aggregate( steps ~ date, data=dataset, FUN=median)
+
+steps_NA <- cbind(M_steps_na, Md_steps_na$steps)
+names(steps_NA) <- c('Date', 'Mean of total steps/day', 'Median of total steps/day')
+steps_NA
+```
+
+As you can see the values of medians are confusing. I tried many ways to calculate medians for each date according to the asingment but I didn't fixed it. 
+
+## What is the average daily activity pattern?
+
+Calculate avarage steps of intervals accross all days.
+Remove the days without activity. 
+We use reshape2 and plyr packages for this.
+We store the result into steps_interval data frame. 
+
+```{r Average steps, echo=TRUE}
+steps_interval_mean <- aggregate( steps ~ interval, data=dataset, FUN=mean)
+```
+
+Make a plot of the average steps within interval 
+
+```{r Average steps plot, echo=TRUE}
+rg_I  <- range(steps_interval_mean$interval)
+rg_I2 <- range(steps_interval_mean$steps)
+
+with(steps_interval_mean, plot(interval, steps, type="n", lwd = 2, axes=FALSE, xlab="Interval", ylab="Average steps"))
+
+axis(1, at=50*0:rg_I[2]) 
+axis(2, at=20*0:rg_I2[2])
+with(steps_interval_mean, lines(interval, steps, col="red"))
+title(main='Activity measure')
+```
+
+*Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?* 
+
+```{r Max steps interval, echo=TRUE}
+steps_interval_max <-  aggregate(steps ~ interval, data=dataset, FUN=sum)
+
+steps_interval_max <- steps_interval_max[order(steps_interval_max[2], decreasing=T),]
+
+max_i <- steps_interval_max[1,]; names(max_i) <- c('ID of interval', 'Number of steps'); print(max_i)
+```
+
+The 5-minute interval which contains the maximum number of steps is interval number  `r max_i[[1]]`. 
+
+
+## Imputing missing values
+
+Calculate the total number of missing values in the dataset 
+
+```{r Total NAs, echo=TRUE}
+sum(is.na(dataset))
+```
+
+Find NA value in dataset and replace them by average number of steps within the interval accross all days.
+
+```{r NAs replacement, echo=TRUE}
+
+interval <- unique(dataset$interval)
+for (i in interval) {
+      dataset[dataset$interval==i & is.na(dataset$steps), "steps"] <- 
+      steps_interval_mean[steps_interval_mean$interval==i, "steps"]      
+}
+
+sum(is.na(dataset)) ## check 
+```
+
+Calculate the total sum of steps each day
+
+```{r Steps/day without NAs, echo=TRUE}
+total_steps <- aggregate(steps ~ date, data=dataset, FUN=sum)
+```
+
+Create histogram of the total number of steps taken per day.
+
+```{r Steps/day hist without NAs, echo=TRUE}
+rg <- range(total_steps$steps)
+with(total_steps, hist(steps, main="Histogram of total steps by date",
+                            xlab = "Total steps by day",ylab = "Counts", col = "red",
+                            breaks=20, axes=F))
+axis(1, at=1000*0:rg[2])
+axis(2, at=2*0:20)
+```
+
+Calculate mean and median of steps taken per day
+
+```{r M/Md , echo=TRUE}
+M_steps <- aggregate(steps ~ date, data=dataset, FUN=mean)
+
+Md_steps <- aggregate(steps ~ date, data=dataset, FUN=median)
+
+MMd_steps <- cbind(M_steps, Md_steps$steps)
+
+names(MMd_steps) <- c('Date', 'Mean of total steps/day', 'Median of total steps/day')
+MMd_steps
+```
+
+Now we can compare the results between the first and third part of assingment. 
+
+```{r Compare Means and Medians , echo=TRUE}
+## compare means ## compare means ## compare means 
+
+compare_mean <- merge(M_steps_na, M_steps, by="date", all.y=T)
+names(compare_mean) <- c('Date', 'Without NA correction', 'With NA correction')
+compare_mean
+
+## compare medians ## compare medians ## compare medians 
+
+compare_median <- merge(Md_steps_na, Md_steps, by="date", all.y=T)
+names(compare_median) <- c('Without NA correction', 'With NA correction')
+compare_median
+```
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+
+We use weekdays() fuction and filter() function from dplyr package to subset and compare activity from weekdays and weekends. 
+
+* Please note that names of weekdays are in Slovak language 
+
+```{r Compare weekdays and weekends , echo=TRUE}
+dataset$date <- as.Date(as.character(dataset$date)) ## set date variable to Date class
+
+## subset weekdays activity 
+df_weekdays <- filter(dataset, weekdays(date)=='pondelok'| weekdays(date)=='utorok' | weekdays(date)=='streda'| weekdays(date)=='štvrtok'| weekdays(date)=='piatok')
+
+## subset weekend activity 
+df_weekend <- filter(dataset, weekdays(date)=='sobota'| weekdays(date)=='nede¾a')
+
+weekdays_avg <- aggregate(steps ~ interval, data=df_weekdays, FUN=mean)
+ 
+weekends_avg <- aggregate(steps ~ interval, data=df_weekend, FUN=mean)
+```
+
+```{r Plot weekdays/weekends, echo=TRUE}
+par(mfrow = c(2,1), mar=c(5,4,1,1), las=1)
+
+## Plot for Weekdays 
+rg_d1  <- range(weekdays_avg$interval)
+rg_d2 <- range(weekdays_avg$steps)
+
+with(weekdays_avg, plot(interval, steps, type="n", axes=F, xlab="Interval", ylab="Average steps"))
+axis(1, at=150*0:rg_d1[2]) 
+axis(2, at=30*0:rg_d2[2])
+with(weekdays_avg, lines(interval, steps, col="chartreuse4", lwd = 2))
+title(main='Actitivity measure during weekdays')
+
+## Plot for Weekends
+rg_e1  <- range(weekends_avg$interval)
+rg_e2  <- range(weekends_avg$steps)
+
+with(weekends_avg, plot(interval, steps, type="n", axes=F, xlab="Interval", ylab="Average steps"))
+axis(1, at=150*0:rg_d1[2]) 
+axis(2, at=30*0:rg_d2[2])
+with(weekends_avg, lines(interval, steps, col="cadetblue4", lwd = 2))
+title(main='Actitivity measure during weekends')
+
+```
