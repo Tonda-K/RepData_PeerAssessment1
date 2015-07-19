@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 This is markdown file for Peer Assessment 1 in Reproducible research course 
 ===========================================================================
 
@@ -93,10 +94,31 @@ max_i <- steps_interval_max[1,]; names(max_i) <- c('ID of interval', 'Number of 
 ```
 
 The 5-minute interval which contains the maximum number of steps is interval number  `r max_i[[1]]`. 
+=======
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+
+
+
+## What is mean total number of steps taken per day?
+
+
+
+## What is the average daily activity pattern?
+
+>>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
 
 
 ## Imputing missing values
 
+<<<<<<< HEAD
 Calculate the total number of missing values in the dataset 
 
 ```{r Total NAs, echo=TRUE}
@@ -207,3 +229,8 @@ with(weekends_avg, lines(interval, steps, col="cadetblue4", lwd = 2))
 title(main='Actitivity measure during weekends')
 
 ```
+=======
+
+
+## Are there differences in activity patterns between weekdays and weekends?
+>>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
