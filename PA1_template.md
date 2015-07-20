@@ -2,6 +2,19 @@
 Tonda  
 2015-07-20  
 
+
+```r
+require(knitr)
+```
+
+```
+## Loading required package: knitr
+```
+
+```r
+opts_chunk$set(echo = TRUE, cache = TRUE, cache.path = "cache/", fig.path = "figure/")
+```
+
 This is markdown file for Peer Assessment 1 in Reproducible research course 
 ===========================================================================
 
@@ -50,19 +63,6 @@ We store the result into total_steps data frame.
 library(reshape2); library(dplyr)
 ```
 
-```
-## 
-## Attaching package: 'dplyr'
-## 
-## The following object is masked from 'package:stats':
-## 
-##     filter
-## 
-## The following objects are masked from 'package:base':
-## 
-##     intersect, setdiff, setequal, union
-```
-
 
 ```r
 total_steps_NA <- aggregate( steps ~ date, data=dataset, FUN=sum)
@@ -80,7 +80,7 @@ axis(1, at=1000*0:rg_NA[2])
 axis(2, at=2*0:20)
 ```
 
-![](PA1_template_files/figure-html/Steps/day hist-1.png) 
+![](figure/Steps/day hist-1.png) 
 
 Calculate the mean and the median of total number of steps per day
 
@@ -180,7 +180,7 @@ with(steps_interval_mean, lines(interval, steps, col="red"))
 title(main='Activity measure')
 ```
 
-![](PA1_template_files/figure-html/Average steps plot-1.png) 
+![](figure/Average steps plot-1.png) 
 
 *Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?* 
 
@@ -247,7 +247,7 @@ axis(1, at=1000*0:rg[2])
 axis(2, at=2*0:20)
 ```
 
-![](PA1_template_files/figure-html/Steps/day hist without NAs-1.png) 
+![](figure/Steps/day hist without NAs-1.png) 
 
 Calculate mean and median of steps taken per day
 
@@ -524,4 +524,4 @@ with(weekends_avg, lines(interval, steps, col="cadetblue4", lwd = 2))
 title(main='Actitivity measure during weekends')
 ```
 
-![](PA1_template_files/figure-html/Plot weekdays/weekends-1.png) 
+![](figure/Plot weekdays/weekends-1.png) 
