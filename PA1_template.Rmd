@@ -1,6 +1,20 @@
-<<<<<<< HEAD
+---
+title: "RPA1"
+author: "Tonda"
+date: "2015-07-20"
+output:
+  html_document:
+    keep_md: yes
+---
+
+```{r setoptions, echo=TRUE}
+require(knitr)
+opts_chunk$set(echo = TRUE, cache = TRUE, cache.path = "cache/", fig.path = "figure/")
+```
+
 This is markdown file for Peer Assessment 1 in Reproducible research course 
 ===========================================================================
+
 
 ## Loading and preprocessing the data
 
@@ -22,8 +36,7 @@ sum(is.na(dataset[,1]))
 ##### Make a histogram of the total number of steps taken each day #####
 
 Calculate total steps per day.
-We use reshape2 and plyr packages for this.
-We store the result into total_steps data frame. 
+We store the result into total_steps-NA data frame. 
 
 ```{r library, echo=TRUE, results='hide'}
 library(reshape2); library(dplyr)
@@ -47,22 +60,27 @@ axis(2, at=2*0:20)
 
 Calculate the mean and the median of total number of steps per day
 
-```{r Steps/day mean, echo=TRUE}
-M_steps_na <- aggregate( steps ~ date, data=dataset, FUN=mean)
-Md_steps_na <- aggregate( steps ~ date, data=dataset, FUN=median)
+**In this case we consider that in the measured values of steps are a lots of 'NA' and '0' or 'Zeros'. According to this fact we calculate the mean and median of total steps without NAs and Zeros both with and without NA's correction.** 
 
-steps_NA <- cbind(M_steps_na, Md_steps_na$steps)
-names(steps_NA) <- c('Date', 'Mean of total steps/day', 'Median of total steps/day')
-steps_NA
+Check total number of NAs and Zeros 
+
+```{r NAs/0s mean, echo=TRUE}
+sum(is.na(dataset$steps))
+sum(dataset$steps==0, na.rm=T)
 ```
 
-As you can see the values of medians are confusing. I tried many ways to calculate medians for each date according to the asingment but I didn't fixed it. 
+Mean and median of total number of steps without NA's correction. 
+```{r Steps/day mean, echo=TRUE}
+M_steps_na <-     mean(dataset$steps[dataset$steps!=0], na.rm=T)
+Md_steps_na <-    median(dataset$steps[dataset$steps!=0], na.rm=T)
+```
+
+The mean of total number of steps without NA's correction is **`r M_steps_na`** and median is **`r Md_steps_na`.** 
 
 ## What is the average daily activity pattern?
 
 Calculate avarage steps of intervals accross all days.
 Remove the days without activity. 
-We use reshape2 and plyr packages for this.
 We store the result into steps_interval data frame. 
 
 ```{r Average steps, echo=TRUE}
@@ -93,37 +111,15 @@ steps_interval_max <- steps_interval_max[order(steps_interval_max[2], decreasing
 max_i <- steps_interval_max[1,]; names(max_i) <- c('ID of interval', 'Number of steps'); print(max_i)
 ```
 
-The 5-minute interval which contains the maximum number of steps is interval number  `r max_i[[1]]`. 
-=======
----
-title: "Reproducible Research: Peer Assessment 1"
-output: 
-  html_document:
-    keep_md: true
----
+The 5-minute interval which contains the maximum number of steps is interval number  **`r max_i[[1]]`.**
 
 
-## Loading and preprocessing the data
-
-
-
-## What is mean total number of steps taken per day?
-
-
-
-## What is the average daily activity pattern?
-
->>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
-
-
-## Imputing missing values
-
-<<<<<<< HEAD
 Calculate the total number of missing values in the dataset 
 
 ```{r Total NAs, echo=TRUE}
-sum(is.na(dataset))
+sum_na <- sum(is.na(dataset))
 ```
+**Total number of missing values in the dataset 'activity' is `r sum_na`.** 
 
 Find NA value in dataset and replace them by average number of steps within the interval accross all days.
 
@@ -158,38 +154,28 @@ axis(2, at=2*0:20)
 Calculate mean and median of steps taken per day
 
 ```{r M/Md , echo=TRUE}
-M_steps <- aggregate(steps ~ date, data=dataset, FUN=mean)
-
-Md_steps <- aggregate(steps ~ date, data=dataset, FUN=median)
-
-MMd_steps <- cbind(M_steps, Md_steps$steps)
-
-names(MMd_steps) <- c('Date', 'Mean of total steps/day', 'Median of total steps/day')
-MMd_steps
+M_steps  <-     mean(dataset$steps[dataset$steps!=0])
+Md_steps <-    median(dataset$steps[dataset$steps!=0])
 ```
 
-Now we can compare the results between the first and third part of assingment. 
+The *mean* of total number of steps *without NA's correction* is **`r M_steps_na`**, in contrast the  *mean* of total number of steps **WITH NA's correction** is **`r M_steps`**. On the other hand the *median without NA's correction* is **`r Md_steps_na`**, in contrast the *median WITH NA's correction* is **`r Md_steps`**.
 
-```{r Compare Means and Medians , echo=TRUE}
-## compare means ## compare means ## compare means 
-
-compare_mean <- merge(M_steps_na, M_steps, by="date", all.y=T)
-names(compare_mean) <- c('Date', 'Without NA correction', 'With NA correction')
-compare_mean
-
-## compare medians ## compare medians ## compare medians 
-
-compare_median <- merge(Md_steps_na, Md_steps, by="date", all.y=T)
-names(compare_median) <- c('Without NA correction', 'With NA correction')
-compare_median
-```
-
+We can see the discrepancy between the values calculated from 'with' or 'without' NA's correction. It may seem weird that values from without NA's correction are bigger. But we have to consider bigger total sum of particular elements for dataset with NA's correction which could affect the values of mean and median significantly. 
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 We use weekdays() fuction and filter() function from dplyr package to subset and compare activity from weekdays and weekends. 
 
-* Please note that names of weekdays are in Slovak language 
+**Please note that names of weekdays are in Slovak language**
+Legend:
+
+1. pondelok    = *"Monday"*
+2. utorok      = *"Tuesday"*
+3. streda      = *"Wednesday"*
+4. štvrtok     = *"Thursday"*
+5. piatok      = *"Friday"*
+6. sobota      = *"Saturday"*
+7. nede¾a      = *"Sunnday"*
 
 ```{r Compare weekdays and weekends , echo=TRUE}
 dataset$date <- as.Date(as.character(dataset$date)) ## set date variable to Date class
@@ -229,8 +215,3 @@ with(weekends_avg, lines(interval, steps, col="cadetblue4", lwd = 2))
 title(main='Actitivity measure during weekends')
 
 ```
-=======
-
-
-## Are there differences in activity patterns between weekdays and weekends?
->>>>>>> 80edf39c3bb508fee88e3394542f967dd3fd3270
